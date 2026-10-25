@@ -1,6 +1,33 @@
 # Resume Optimizer
 
-Local, privacy-first job application pipeline for browser-assisted discovery, match scoring, truthful resume tailoring, fact-gated application filling, and local application tracking.
+An inspectable Python workflow for turning job postings into validated records, evidence-bound resume suggestions, and a local application history. Built around SQLite state, deterministic screening, and explicit boundaries for AI-assisted work.
+
+## Engineering Overview
+
+This is a personal workflow tool and public engineering sample. It demonstrates data ingestion, record identity, state transitions, validation, and AI integration; it is not a distributed data platform or a trained resume-ranking model.
+
+| Area | Implementation to inspect |
+| --- | --- |
+| Data ingestion and normalization | [ATS adapters](scripts/ats_adapter.py) and [discovery](scripts/discovery.py) |
+| Persistent state and exports | [SQLite store](scripts/job_store.py), with CSV compatibility exports |
+| Data quality and decision gates | [Screening](scripts/screen_job.py) and [snapshot verification](scripts/verify_discovery_snapshot.py) |
+| AI integration | [Tailoring](scripts/tailor.py): local evidence packets by default, optional configured model providers |
+| Reliability | [Workflow tests](tests/test_sqlite_workflow.py), [locking tests](tests/test_pipeline_lock.py), and [CI](.github/workflows/ci.yml) |
+| Data boundaries | [Public/private contract](DATA_CONTRACT.md) and [security scanner](scripts/security_check.py) |
+
+For a short explanation of design decisions, limitations, and the test evidence, read the [engineering case study](docs/engineering_case_study.md).
+
+### Review Without Personal Data
+
+Start with the source and tests above. The following checks do not require a personal resume, mailbox connection, browser session, or model API key. Install the dependencies from the setup section first.
+
+```bash
+python -m unittest discover -s tests -v
+python scripts/doctor.py --public-only
+python scripts/security_check.py --fail-on-finding
+```
+
+These commands validate the public checkout; they do not start the recurring workflow. Live job-source availability and real browser interactions require separate verification.
 
 The project keeps private job-search criteria, profile facts, application answers, resumes, application packets, and tracker data out of Git. Public files contain reusable tooling and templates; local private files drive the actual search and application decisions.
 
